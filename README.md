@@ -1,4 +1,4 @@
-eng_rus_reader
+EngRusReader
 ==============
 
 Application for easy reading electronic books and documents in English
