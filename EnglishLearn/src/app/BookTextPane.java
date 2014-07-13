@@ -1,12 +1,19 @@
 package app;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagLayout;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -30,9 +37,23 @@ public class BookTextPane extends JPanel {
         
         JButton pageDownButton = new JButton("<");
         JButton pageUpButton = new JButton(">");
-        JTextField pageTextField= new JTextField("1/20");
+        JTextField pageTextField= new JTextField("1 / 20");
+        pageTextField.setHorizontalAlignment(SwingConstants.CENTER);
+        pageTextField.setMinimumSize(new Dimension(60, 20));
         
-        add(new JScrollPane(bookTextPane), new GBC(0, 0, 3, 1).setWeight(100, 100).setFill(GBC.BOTH));
+        JScrollPane scrollPane = new JScrollPane(bookTextPane);
+        verticalScrollBar = scrollPane.getVerticalScrollBar();
+        
+        verticalScrollBar.addAdjustmentListener(new AdjustmentListener() {
+
+            @Override
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                int pos = verticalScrollBar.getHeight()+e.getValue();
+                System.out.println(pos+" "+bookTextPane.getHeight());
+            }
+        });
+        
+        add(scrollPane, new GBC(0, 0, 3, 1).setWeight(100, 100).setFill(GBC.BOTH));
         add(pageDownButton, new GBC(0, 1).setWeight(100, 0).setAnchor(GBC.EAST));
         add(pageTextField, new GBC(1, 1).setAnchor(GBC.CENTER));
         add(pageUpButton, new GBC(2, 1).setWeight(100, 0).setAnchor(GBC.WEST));
@@ -52,4 +73,5 @@ public class BookTextPane extends JPanel {
     }
     
     private JTextPane bookTextPane = new JTextPane();
+    private JScrollBar verticalScrollBar = null;
 }

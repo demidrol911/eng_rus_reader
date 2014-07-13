@@ -129,13 +129,14 @@ public class LanguageFrame extends JFrame implements ActionListener {
     private FileChooser fileChooser = new FileChooser();
 
     private JTabbedPane tabbedPane = new JTabbedPane();
-    private String[] menuArray = {"File", "Help"};
+    private String[] menuArray = {"File", "Dict", "Help"};
     private String[][][] menuItemArray = {{{"Open book",  "open", "open_file.png"},
                                            {"Open URL", "open_url", "url.png"}, 
                                            {"Open clipboard", "open_clipboard", "clipboard.png"},
                                            {"Analyze book", "analyze", "analyze.png"},
                                             null,
                                            {"Close", "close", "close_program.png"}},
+                                          {null},
                                           {{"About", "about", "open_help.png"}}};
 
     public static Dimension DEFAULT_SIZE = new Dimension(720, 560);
