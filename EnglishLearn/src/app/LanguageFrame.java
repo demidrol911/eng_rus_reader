@@ -16,9 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
 
 
 public class LanguageFrame extends JFrame implements ActionListener {
@@ -30,22 +27,11 @@ public class LanguageFrame extends JFrame implements ActionListener {
 
 
         splitPane.setRightComponent(tabbedPane);
-        splitPane.setLeftComponent(new JScrollPane(bookTextPane));
+        splitPane.setLeftComponent(bookTextPane);
         splitPane.setDividerSize(2);
         splitPane.setContinuousLayout(true);
         splitPane.setResizeWeight(0.9);
         splitPane.setDividerLocation(LanguageFrame.DEFAULT_SIZE.width-250);
-
-        bookTextPane.setEditable(false);
-        bookTextPane.setBackground(new Color(0, 26, 66));
-        Style base = StyleContext.getDefaultStyleContext().
-                getStyle(StyleContext.DEFAULT_STYLE);
-        Style book_style = bookTextPane.getStyledDocument().addStyle("book_style", base);
-        StyleConstants.setLineSpacing(book_style, 0.5f);
-        StyleConstants.setFontFamily(book_style, "verdana");
-        StyleConstants.setFontSize(book_style, 12);
-        StyleConstants.setForeground(book_style, new Color(220, 218, 47));
-        bookTextPane.getStyledDocument().setLogicalStyle(0, book_style);
 
         this.setTitle("English Learn");
         this.setIconImage(new ImageIcon(this.getClass().getResource("resources/img/icon.png")).getImage());
@@ -62,7 +48,7 @@ public class LanguageFrame extends JFrame implements ActionListener {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                String word = bookTextPane.getSelectedText();
+                String word = bookTextPane.getSelectedWord();
                 if(e.getClickCount() == 2 && !word.isEmpty()) {
                     tabbedPane.setSelectedIndex(1);
                     bookishWordPanel.setSelectedWord(word.toLowerCase(), true);
@@ -113,19 +99,18 @@ public class LanguageFrame extends JFrame implements ActionListener {
                     fileChooser.setCurrentDirectory(file.getParentFile());
                     TXTBook book = new TXTBook();
                     String text = book.getText(file);
-                    bookTextPane.setText(text);
-                    bookTextPane.setCaretPosition(0);
+                    bookTextPane.setBook(text);
                     this.setTitle("English Learn :: "+file.getPath());
                 }   break;
             case "analyze":
                 tabbedPane.setSelectedIndex(1);
                 tabbedPane.updateUI();
-                bookishWordPanel.setText(bookTextPane.getText());
+                bookishWordPanel.setText(bookTextPane.getBook());
                 break;
             case "open_clipboard":
                 try {
                     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                    bookTextPane.setText((String)clipboard.getData(DataFlavor.stringFlavor));
+                    bookTextPane.setBook((String)clipboard.getData(DataFlavor.stringFlavor));
                 } catch (UnsupportedFlavorException | IOException ex) {
                     Logger.getLogger(LanguageFrame.class.getName()).log(Level.SEVERE, null, ex);
                 }   break;
@@ -140,7 +125,7 @@ public class LanguageFrame extends JFrame implements ActionListener {
 
     private DictionaryPanel dictPane = new DictionaryPanel();
     private BookishWordPanel bookishWordPanel = new BookishWordPanel();
-    private JTextPane bookTextPane = new JTextPane();
+    private BookTextPane bookTextPane = new BookTextPane();
     private FileChooser fileChooser = new FileChooser();
 
     private JTabbedPane tabbedPane = new JTabbedPane();
