@@ -49,7 +49,7 @@ public class BookTextPane extends JPanel {
             @Override
             public void adjustmentValueChanged(AdjustmentEvent e) {
                 int pos = verticalScrollBar.getHeight()+e.getValue();
-                System.out.println(pos+" "+bookTextPane.getHeight());
+                //System.out.println(pos+" "+bookTextPane.getHeight());
             }
         });
         
