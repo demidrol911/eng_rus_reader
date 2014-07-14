@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.awt.event.MouseListener;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
@@ -57,6 +58,11 @@ public class BookTextPane extends JPanel {
         add(pageDownButton, new GBC(0, 1).setWeight(100, 0).setAnchor(GBC.EAST));
         add(pageTextField, new GBC(1, 1).setAnchor(GBC.CENTER));
         add(pageUpButton, new GBC(2, 1).setWeight(100, 0).setAnchor(GBC.WEST));
+    }
+
+    @Override
+    public synchronized void addMouseListener(MouseListener l) {
+        bookTextPane.addMouseListener(l);
     }
     
     public void setBook(String text) {

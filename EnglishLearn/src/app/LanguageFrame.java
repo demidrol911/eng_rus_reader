@@ -41,7 +41,7 @@ public class LanguageFrame extends JFrame implements ActionListener {
 
         this.setJMenuBar(createMenu());
         tabbedPane.add("Dictionary", dictPane);
-        tabbedPane.add("Bookish words", bookishWordPanel);
+        tabbedPane.add("Wordlist", bookishWordPanel);
         this.getContentPane().add(splitPane, BorderLayout.CENTER);
         
         bookTextPane.addMouseListener(new MouseAdapter() {
