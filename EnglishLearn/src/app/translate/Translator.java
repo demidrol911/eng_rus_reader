@@ -1,5 +1,7 @@
 package app.translate;
 
+import com.sleepycat.bind.tuple.BooleanBinding;
+import com.sleepycat.bind.tuple.StringBinding;
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseConfig;
 import com.sleepycat.je.DatabaseEntry;
@@ -9,13 +11,12 @@ import com.sleepycat.je.LockMode;
 import com.sleepycat.je.OperationStatus;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -32,13 +33,20 @@ public class Translator {
         if(!envDir.exists())
             envDir.mkdir();
         dictEnv = new Environment(envDir, envConfig);
-       
+        
+        String islearnName = "word_islearn";
+        islearnDatabase = dictEnv.openDatabase(null, islearnName, dbConfig);
+        for(String nameDataBase: getDictList()) {
+            if(!nameDataBase.equals(islearnName)) {
+                Database dict = dictEnv.openDatabase(null, nameDataBase, dbConfig);
+                dictList.put(nameDataBase, dict);
+            }
+        }
     }
     
     public void convertDict(File xml_dict) {
         try {
             String dict_title = xml_dict.getName();
-            selectDict(dict_title);
             
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -54,7 +62,7 @@ public class Translator {
                     Element articleElement = (Element) article;
                     String word = articleElement.getElementsByTagName("k").item(0).getTextContent();
                     String translation = articleElement.getLastChild().getTextContent();
-                    String transcription = "";
+                    String transcription;
                     if(articleElement.getElementsByTagName("tr").item(0) != null) {
                         transcription = articleElement.getElementsByTagName("tr").item(0).getTextContent();
                         translation = "["+transcription+"] "+translation;
@@ -62,8 +70,7 @@ public class Translator {
                     translation = translation.replaceAll(word.replaceAll("[*]", ""), "~");
                     translation = translation.replaceAll(" +", " ");
                     translation = translation.replaceAll("^\n+", "");
-                    DictionaryEntry dictEntry = new DictionaryEntry(translation, false);
-                    dictEntry.setDictName(dict_title);
+                    DictionaryEntry dictEntry = new DictionaryEntry(translation, dict_title);
                     WordEntry wordEntry = new WordEntry(word);
                     wordEntry.addDictEntry(dictEntry);
                     learnWord(wordEntry);
@@ -71,85 +78,104 @@ public class Translator {
                 }
             }
         } catch (SAXException | IOException | ParserConfigurationException ex) {
-            Logger.getLogger(Translator.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        finally{
-            dict.close();
-            dict = null;
+            LOG.error(ex.getMessage(), ex);
         }
     }
     
-    public void selectDict(String dict_title) {
-        if(dict != null) {
-            dict.close();
+    
+    public Database selectDict(String dict_title) {
+        if(!dictList.containsKey(dict_title)) {
+            Database dict = dictEnv.openDatabase(null, dict_title, dbConfig);
+            dictList.put(dict_title, dict);
         }
-        dict = dictEnv.openDatabase(null, dict_title, dbConfig);
+        return dictList.get(dict_title);
     }
     
     
     public void learnWord(WordEntry wordEntry) {
-        try {
-            DatabaseEntry key = new DatabaseEntry(wordEntry.getWord().getBytes("UTF-8"));
-            DatabaseEntry data = new DatabaseEntry();
-            for(DictionaryEntry dictEntry: wordEntry.getDictEntries()) {
-                selectDict(dictEntry.getDictName());
-                dictTupleBinding.objectToEntry(dictEntry, data);
-                dict.put(null, key, data);
-            }
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(Translator.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        String translation = wordEntry.getDictEntries().get(0).getTranslation();
+        String dictName = wordEntry.getDictEntries().get(0).getDictName();
+        DatabaseEntry wordkey = new DatabaseEntry();
+        DatabaseEntry data = new DatabaseEntry();
+        stringBinding.objectToEntry(wordEntry.getWord(), wordkey); 
+        stringBinding.objectToEntry(translation, data);
+        Database dict = selectDict(dictName);
+        dict.put(null, wordkey, data);
     }
+    
+    
+    public boolean isWordLearn(String word) {
+        DatabaseEntry wordkey = new DatabaseEntry();
+        stringBinding.objectToEntry(word, wordkey);
+        DatabaseEntry learnData = new DatabaseEntry();
+        return islearnDatabase.get(null, wordkey, learnData, LockMode.DEFAULT) == OperationStatus.SUCCESS;
+    }
+    
+    public void setWordIsLearn(WordEntry wordEntry) {
+        boolean learn = isWordLearn(wordEntry.getWord());
+        DatabaseEntry wordkey = new DatabaseEntry();
+        stringBinding.objectToEntry(wordEntry.getWord(), wordkey); 
+        if(!learn && wordEntry.isLearn()) {
+            DatabaseEntry learnData = new DatabaseEntry();
+            booleanBinding.objectToEntry(true, learnData);
+            islearnDatabase.put(null, wordkey, learnData);
+        }
+        else if (learn && !wordEntry.isLearn()) {
+            islearnDatabase.removeSequence(null, wordkey);
+        } 
+    }    
     
     public WordEntry translateWord(String word) {
         WordEntry wordEntry = new WordEntry(word);
+        wordEntry.setLearn(isWordLearn(word));
         wordEntry = searchDictEntry(wordEntry, word);
-        if(wordEntry.getDictEntries().isEmpty() && word.endsWith("s")) {
+        if(wordEntry.getDictEntries().isEmpty() && word.endsWith("s"))
             wordEntry = searchDictEntry(wordEntry, word.substring(0, word.length()-1));
-        }
         return wordEntry;
     }
+    
     
     public List<String> getDictList() {
         return dictEnv.getDatabaseNames();
     }
     
+    
     private WordEntry searchDictEntry(WordEntry wordEntry, String word) {
-        try {
-            List<String> dictNames = getDictList();
-            DatabaseEntry wordkey = new DatabaseEntry(word.getBytes("UTF-8"));
-            DatabaseEntry translateData = new DatabaseEntry();
-            for (String dictName : dictNames) {
-                selectDict(dictName);
-                if(dict.get(null, wordkey, translateData, LockMode.DEFAULT) 
-                        == OperationStatus.SUCCESS) {
-                    DictionaryEntry dictEntry = (DictionaryEntry)dictTupleBinding.entryToObject(translateData);
-                    dictEntry.setDictName(dictName);
-                    wordEntry.addDictEntry(dictEntry);
-                }
+        DatabaseEntry wordkey = new DatabaseEntry();
+        stringBinding.objectToEntry(word, wordkey); 
+        DatabaseEntry translateData = new DatabaseEntry();
+        for(Database dict: dictList.values()) {
+            if(dict.get(null, wordkey, translateData, LockMode.DEFAULT) 
+                    == OperationStatus.SUCCESS) {
+                DictionaryEntry dictEntry = new DictionaryEntry(
+                        stringBinding.entryToObject(translateData),
+                        dict.getDatabaseName());
+                wordEntry.addDictEntry(dictEntry);
             }
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(Translator.class.getName()).log(Level.SEVERE, null, ex);
         }
         return wordEntry;
     }
     
     
     public void dismiss() {
-        if(dict != null) {
+        for(Database dict: dictList.values()){
             dict.close();
         }
+        islearnDatabase.close();
         if(dictEnv != null) {
             dictEnv.close();
         }
     }
     
+    Logger LOG =  Logger.getLogger(Translator.class);
     
     private final EnvironmentConfig envConfig = new EnvironmentConfig();
     private final DatabaseConfig dbConfig = new DatabaseConfig();
-    private final DictionaryTupleBinding dictTupleBinding = new DictionaryTupleBinding();
     private Environment dictEnv = null;
-    private Database dict = null;
+    private final HashMap<String, Database> dictList = new HashMap<>();
+    private Database islearnDatabase = null;
+    private final StringBinding stringBinding = new StringBinding();
+    private final BooleanBinding booleanBinding = new BooleanBinding();
     
     
     public static void main(String[] args) {

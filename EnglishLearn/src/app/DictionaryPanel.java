@@ -93,7 +93,7 @@ public class DictionaryPanel extends JPanel {
 
 
     private JTextField wordTextField = new JTextField();
-    private DictionaryTextPane translationTextPane = new DictionaryTextPane();
+    private final DictionaryTextPane translationTextPane = new DictionaryTextPane();
     private JCheckBox liveSearchCheckBox = new JCheckBox();
     private JButton searchButton = null;
 }

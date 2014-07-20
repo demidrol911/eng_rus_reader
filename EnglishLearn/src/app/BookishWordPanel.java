@@ -6,10 +6,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
@@ -158,7 +154,7 @@ public class BookishWordPanel extends JPanel {
                         progressBar.setVisible(false);
                         statusLabel.setText("Number words: "+BookishWordPanel.this.analyzer.countWords());
                         bookishWordTable.updateUI();
-                        setSelectedWord(0, false);
+                        setSelectedWord(0, true);
                     }
                 });
             }

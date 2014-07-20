@@ -5,9 +5,14 @@ import java.util.ArrayList;
 
 public class WordEntry {
 
-    public WordEntry(String word) {
+    public WordEntry(String word, boolean learn) {
         this.word = word;
-        this.frequency = 1;          
+        this.frequency = 1;     
+        this.learn = learn;
+    }
+    
+    public WordEntry(String word) {
+        this(word, false);
     }
 
     public String getWord() {
@@ -24,6 +29,14 @@ public class WordEntry {
 
     public int getFrequency() {
         return frequency;
+    }
+    
+    public boolean isLearn() {
+        return learn;
+    }
+    
+    public void setLearn(boolean learn) {
+        this.learn = learn;
     }
 
     @Override
@@ -42,7 +55,8 @@ public class WordEntry {
     
     
     private String word = null;
-    private ArrayList<DictionaryEntry> dictEntries = new ArrayList<>();
+    private final ArrayList<DictionaryEntry> dictEntries = new ArrayList<>();
+    private boolean learn = false;
     private int frequency = 0;
     
 }

@@ -3,13 +3,13 @@ package app.translate;
 
 public class DictionaryEntry {
     
-    public DictionaryEntry(String translation, boolean learn) {
+    public DictionaryEntry(String translation, String dictName) {
         this.translation = translation;
-        this.learn = learn;
+        this.dictName = dictName;
     }
 
     public DictionaryEntry() {
-        this("", false);
+        this("", "");
     }
 
     public void setTranslation(String translation) {
@@ -20,14 +20,6 @@ public class DictionaryEntry {
         return translation;
     }
     
-    public void setLearn(boolean learn) {
-        this.learn = learn;
-    }
-
-    public boolean isLearn() {
-        return learn;
-    }
-    
     public void setDictName(String dictName) {
         this.dictName = dictName;
     }
@@ -36,8 +28,6 @@ public class DictionaryEntry {
         return dictName;
     }
     
-    
     private String translation = null;
-    private boolean learn = false;
     private String dictName = null;
 }

@@ -8,14 +8,13 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
+
 
 public class DictionaryTextPane extends JTextPane {
 
     public DictionaryTextPane() {
         super();
-        
         this.setEditable(false);
   
     }
@@ -59,9 +58,11 @@ public class DictionaryTextPane extends JTextPane {
             }
         }
         catch (BadLocationException ex) {
-            Logger.getLogger(DictionaryTextPane.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.error(ex.getMessage(), ex);
         }   
         this.setDocument(transDoc);
         this.setCaretPosition(0);
     }
+    
+    Logger LOG = Logger.getLogger(DictionaryTextPane.class);
 }

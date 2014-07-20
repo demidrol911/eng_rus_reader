@@ -2,7 +2,7 @@ package app;
 
 import java.awt.*;
 
-/**Оболочка для GridBagConstraints*/
+
 public class GBC extends GridBagConstraints {
 
     public GBC(int gridx, int gridy) {

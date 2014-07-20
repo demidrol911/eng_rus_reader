@@ -13,8 +13,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -78,6 +76,6 @@ public class BookTextPane extends JPanel {
         return bookTextPane.getSelectedText();
     }
     
-    private JTextPane bookTextPane = new JTextPane();
+    private final JTextPane bookTextPane = new JTextPane();
     private JScrollBar verticalScrollBar = null;
 }

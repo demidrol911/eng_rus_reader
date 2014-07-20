@@ -1,31 +1,28 @@
 package app;
 
 
-import com.nilo.plaf.nimrod.NimRODLookAndFeel;
-import com.nilo.plaf.nimrod.NimRODTheme;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.*;
+import javax.swing.plaf.metal.MetalLookAndFeel;
+import org.apache.log4j.Logger;
 
 public class Main {
 
     public static void main(String[] args) {
+        
+        final Logger LOG = Logger.getLogger(Main.class);
+                
         SwingUtilities.invokeLater(new Runnable() {
 
             @Override
             public void run() {
-                JFrame.setDefaultLookAndFeelDecorated(true);
                 try {
-                    NimRODLookAndFeel lookAndFeel = new NimRODLookAndFeel();
-                    NimRODTheme theme = new NimRODTheme("snow.theme");
-                    NimRODLookAndFeel.setCurrentTheme(theme);
-                    UIManager.setLookAndFeel(lookAndFeel);
+                    UIManager.setLookAndFeel(new MetalLookAndFeel());
+                    JFrame.setDefaultLookAndFeelDecorated(true);
+                    JDialog.setDefaultLookAndFeelDecorated(true);
+                    new LanguageFrame().setVisible(true);
                 } catch (UnsupportedLookAndFeelException ex) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    LOG.error(ex.getMessage(), ex);
                 }
-                
-                JDialog.setDefaultLookAndFeelDecorated(true);
-                new LanguageFrame().setVisible(true);
             }
         });   
     }

@@ -18,12 +18,11 @@ public class BookAnalyzer {
             @Override
             public void run() {
                 StringTokenizer tok = new StringTokenizer(text.replaceAll("[^a-zA-z-]", " "), " ");
-                String word = null;
                 int countWord = tok.countTokens()-1;
                 progressBar.setMaximum(countWord);
                 int progress = 0;
                 while(tok.hasMoreElements()) {
-                    word = tok.nextElement().toString().toLowerCase();
+                    String word = tok.nextElement().toString().toLowerCase();
                     if(!wordHash.containsKey(word)){
                         wordHash.put(word, wordEntries.size());
                         wordEntries.add(LanguageFrame.translator.translateWord(word));
@@ -68,6 +67,6 @@ public class BookAnalyzer {
             return -1;
     }
 
-    private HashMap<String, Integer> wordHash = new HashMap<>();
-    private ArrayList<WordEntry> wordEntries = new ArrayList<>(); 
+    private final HashMap<String, Integer> wordHash = new HashMap<>();
+    private final ArrayList<WordEntry> wordEntries = new ArrayList<>(); 
 }

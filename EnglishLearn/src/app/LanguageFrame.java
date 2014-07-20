@@ -14,8 +14,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 
 public class LanguageFrame extends JFrame implements ActionListener {
@@ -112,7 +111,7 @@ public class LanguageFrame extends JFrame implements ActionListener {
                     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                     bookTextPane.setBook((String)clipboard.getData(DataFlavor.stringFlavor));
                 } catch (UnsupportedFlavorException | IOException ex) {
-                    Logger.getLogger(LanguageFrame.class.getName()).log(Level.SEVERE, null, ex);
+                    LOG.error(ex.getMessage(), ex);
                 }   break;
             case "close":
                 dispose();
@@ -120,17 +119,19 @@ public class LanguageFrame extends JFrame implements ActionListener {
         }
     }
 
-
+    
+    Logger LOG = Logger.getLogger(LanguageFrame.class);
+    
     public static Translator translator = new Translator();
 
-    private DictionaryPanel dictPane = new DictionaryPanel();
+    private final DictionaryPanel dictPane = new DictionaryPanel();
     private BookishWordPanel bookishWordPanel = new BookishWordPanel();
     private BookTextPane bookTextPane = new BookTextPane();
-    private FileChooser fileChooser = new FileChooser();
+    private final FileChooser fileChooser = new FileChooser();
 
     private JTabbedPane tabbedPane = new JTabbedPane();
-    private String[] menuArray = {"File", "Dict", "Help"};
-    private String[][][] menuItemArray = {{{"Open book",  "open", "open_file.png"},
+    private final String[] menuArray = {"File", "Dict", "Help"};
+    private final String[][][] menuItemArray = {{{"Open book",  "open", "open_file.png"},
                                            {"Open URL", "open_url", "url.png"}, 
                                            {"Open clipboard", "open_clipboard", "clipboard.png"},
                                            {"Analyze book", "analyze", "analyze.png"},
